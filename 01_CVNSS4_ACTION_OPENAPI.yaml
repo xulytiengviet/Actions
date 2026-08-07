@@ -1,0 +1,82 @@
+openapi: 3.1.0
+info:
+  title: CVNSS4.0 Instant Converter API
+  version: 5.0.0
+  description: >-
+    Source schema for the CVNSS4.0 Action. The deployed Worker serves
+    /openapi.yaml with its own absolute HTTPS origin injected automatically.
+servers:
+  - url: /
+    description: Relative to the deployed CVNSS4.0 Worker origin. For GPT Editor, import the deployed /openapi.yaml URL.
+paths:
+  /convert:
+    post:
+      operationId: convertInstant
+      summary: Convert text instantly between CQN, CVN and CVNSS4.0
+      description: Always use this operation for normal CVNSS4.0 conversion or decoding. Do not audit first.
+      x-openai-isConsequential: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [text, from, to]
+              properties:
+                text: { type: string }
+                from: { type: string, enum: [cqn, cvn, cvss] }
+                to: { type: string, enum: [cqn, cvn, cvss] }
+      responses:
+        '200':
+          description: Converted text
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  output: { type: string }
+                  cqn: { type: string }
+                  cvn: { type: string }
+                  cvss: { type: string }
+                  version: { type: string }
+                  elapsed_ms: { type: number }
+  /inspect:
+    post:
+      operationId: inspectCvnssWord
+      summary: Inspect one CVN/CVNSS4.0 word for ambiguity
+      description: Use only for explicit audit/debug requests, not normal conversion.
+      x-openai-isConsequential: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [word]
+              properties:
+                word: { type: string }
+                source: { type: string, enum: [cvn, cvss], default: cvss }
+      responses:
+        '200':
+          description: Ambiguity inspection result
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+  /health:
+    get:
+      operationId: cvnssHealth
+      summary: Check converter health
+      x-openai-isConsequential: false
+      responses:
+        '200':
+          description: Health status
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ok: { type: boolean }
+                  version: { type: string }
+                  selfTestOk: { type: boolean }
