@@ -4,9 +4,10 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "test": "node test.mjs",
-    "dev": "npx wrangler dev",
-    "deploy": "npx wrangler deploy"
+    "assemble": "node scripts/assemble-converter.mjs",
+    "test": "npm run assemble && node test.mjs",
+    "dev": "npm run assemble && npx wrangler dev",
+    "deploy": "npm run assemble && npx wrangler deploy"
   },
   "devDependencies": {
     "wrangler": "^4.0.0"
