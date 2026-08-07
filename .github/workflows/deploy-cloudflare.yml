@@ -1,0 +1,47 @@
+name: Deploy CVNSS4 Actions API
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'wrangler.toml'
+      - 'package.json'
+      - 'test.mjs'
+      - '.github/workflows/deploy-cloudflare.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '22'
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Test deterministic converter
+        run: node test.mjs
+
+      - name: Deploy Cloudflare Worker
+        id: deploy
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: deploy
+
+      - name: Deployment URL
+        run: |
+          echo "Worker URL: ${{ steps.deploy.outputs.deployment-url }}"
+          echo "GPT schema URL: ${{ steps.deploy.outputs.deployment-url }}/openapi.yaml"
+          echo "Health URL: ${{ steps.deploy.outputs.deployment-url }}/health"
