@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'src/**'
+      - 'assets/**'
+      - 'scripts/**'
       - 'wrangler.toml'
       - 'package.json'
       - 'test.mjs'
@@ -28,6 +30,9 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ env.NODE_VERSION }}
+
+      - name: Assemble converter source
+        run: node scripts/assemble-converter.mjs
 
       - name: Test deterministic converter
         run: node test.mjs
